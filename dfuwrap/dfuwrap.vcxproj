@@ -124,8 +124,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>if not exist "$(SolutionDir)bin" mkdir $(SolutionDir)bin
-if $(ConfigurationName) == Release copy $(TargetPath) $(SolutionDir)bin</Command>
+      <Command>if not exist "$(SolutionDir)windfu_bin" mkdir $(SolutionDir)windfu_bin
+if $(ConfigurationName) == Release copy $(TargetPath) $(SolutionDir)windfu_bin</Command>
       <Message>Copying $(TargetFileName) to $(SolutionDir)bin</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
