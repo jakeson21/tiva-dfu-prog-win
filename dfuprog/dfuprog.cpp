@@ -24,6 +24,10 @@
 //
 //*****************************************************************************
 #define WIN32_LEAN_AND_MEAN
+#define BUFSIZE MAX_PATH
+
+#include <windows.h>
+#include <tchar.h>
 
 #include <iostream>
 #include <stdio.h>
@@ -32,9 +36,10 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include <windows.h>
+
 #include "lmdfu.h"
 #include "lmdfuwrap.h"
+#include "bin2dfuwrap.h"
 
 //*****************************************************************************
 //
@@ -1205,16 +1210,34 @@ main(int argc,char* argv[])
                                 //
                                 if(!g_pszFile.empty())
                                 {
+                                    Bin2DfuWrapper bin2dfu(0x00, g_bVerbose);
                                     // Create dfu wrapped filename based on input file
                                     std::size_t found = g_pszFile.find_last_of(".");            // find extension seperator
-                                    std::string tmpPath = g_pszFile.substr(0, found+1) + "dfu";   // change extension to 'dfu'
-                                    // Execute dfuwrap program
-                                    std::stringstream stream;
-                                    stream << "dfuwrap.exe -i \"" << g_pszFile << "\" -o \"" << tmpPath << "\" -a 0x0 -x";
-                                    system(stream.str().c_str());
-                                    // Set path to our new DFU wrapped binary
-                                    g_pszFile = tmpPath;
-                                    iExitCode = DownloadImage(hHandle, psDFU);
+                                    std::string outPath = g_pszFile.substr(0, found+1) + "dfu";   // change extension to 'dfu'
+
+                                    // dfuwrap
+                                    std::cout << "Wrapping " << g_pszFile << " in DFU headers" << std::endl;
+                                    if (bin2dfu.applyWrapper(g_pszFile, outPath))
+                                    {
+                                        std::cout << "Error encountered during DFU wrap" << std::endl;
+                                    }
+                                    else
+                                    {
+                                        std::cout << "Wrote " << outPath << std::endl;
+
+                                        // Set path to our new DFU wrapped binary
+                                        g_pszFile = outPath;
+
+                                        iExitCode = DownloadImage(hHandle, psDFU);
+                                        if (iExitCode)
+                                        {
+                                            std::cout << "Error encountered during download" << std::endl;
+                                        }
+                                        else
+                                        {
+                                            std::cout << "Download completed sucessfully" << std::endl;
+                                        }
+                                    }
                                 }
                             }
                         }

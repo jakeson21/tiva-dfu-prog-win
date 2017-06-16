@@ -25,36 +25,12 @@
 
 #define WIN32_LEAN_AND_MEAN
 
+#include "bin2dfuwrap.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <unistd.h>
-//#include <dirent.h>
 #include <errno.h>
 #include <sys/stat.h>
-#include "getopt.h"
-
-//typedef unsigned char BOOL;
-#define FALSE 0
-#define TRUE  1
-
-//*****************************************************************************
-//
-// Globals controlled by various command line parameters.
-//
-//*****************************************************************************
-BOOL g_bVerbose     = FALSE;
-BOOL g_bQuiet       = FALSE;
-BOOL g_bOverwrite   = FALSE;
-BOOL g_bAdd         = TRUE;
-BOOL g_bCheck       = FALSE;
-BOOL g_bForce       = FALSE;
-unsigned long  g_ulAddress   = 0;
-unsigned short g_usVendorID  = 0x1CBE;    // Texas Instruments (Tiva)
-unsigned short g_usProductID = 0x00FF;    // DFU boot loader
-unsigned short g_usDeviceID  = 0x0000;
-char *g_pszInput    = NULL;
-char *g_pszOutput = "image.dfu";
 
 //*****************************************************************************
 //
@@ -150,7 +126,7 @@ unsigned char g_pcDFUPrefix[] =
 //
 //*****************************************************************************
 unsigned long
-Reflect(unsigned long ulRef, char ucCh)
+Bin2DfuWrapper::Reflect(unsigned long ulRef, char ucCh)
 {
       unsigned long ulValue;
       int iLoop;
@@ -170,7 +146,7 @@ Reflect(unsigned long ulRef, char ucCh)
 }
 
 void
-InitCRC32Table()
+Bin2DfuWrapper::InitCRC32Table()
 {
     unsigned long ulPolynomial;
     int i, j;
@@ -199,7 +175,7 @@ InitCRC32Table()
 //
 //*****************************************************************************
 unsigned long
-CalculateCRC32(unsigned char *pcData, unsigned long ulLength)
+Bin2DfuWrapper::CalculateCRC32(unsigned char *pcData, unsigned long ulLength)
 {
     unsigned long ulCRC;
     unsigned long ulCount;
@@ -237,53 +213,53 @@ CalculateCRC32(unsigned char *pcData, unsigned long ulLength)
 // Show the startup banner.
 //
 //*****************************************************************************
-void
-PrintWelcome(void)
-{
-    QUIETPRINT("\ndfuwrap - Wrap a binary file for use in USB DFU download.\n");
-    QUIETPRINT("Copyright (c) 2008-2017 Texas Instruments Incorporated.  All rights reserved.\n\n");
-}
+//void
+//PrintWelcome(void)
+//{
+//    QUIETPRINT("\ndfuwrap - Wrap a binary file for use in USB DFU download.\n");
+//    QUIETPRINT("Copyright (c) 2008-2017 Texas Instruments Incorporated.  All rights reserved.\n\n");
+//}
 
 //*****************************************************************************
 //
 // Show help on the application command line parameters.
 //
 //*****************************************************************************
-void
-ShowHelp(void)
-{
-    //
-    // Only print help if we are not in quiet mode.
-    //
-    if(g_bQuiet)
-    {
-        return;
-    }
-
-    printf("This application may be used to wrap binary files which are\n");
-    printf("to be flashed to a Tiva device using the USB boot loader.\n");
-    printf("Additionally, the application can check the validity of an\n");
-    printf("existing Device Firmware Upgrade (DFU) wrapper or remove the\n");
-    printf("wrapper to retrieve the original binary payload.\n\n");
-    printf("Supported parameters are:\n\n");
-    printf("-i <file> - The name of the input file.\n");
-    printf("-o <file> - The name of the output file (default image.dfu)\n");
-    printf("-r        - Remove an existing DFU wrapper from the input file.\n");
-    printf("-c        - Check validity of the input file's existing DFU wrapper.\n");
-    printf("-v <num>  - Set the DFU wrapper's USB vendor ID (default 0x1CBE).\n");
-    printf("-p <num>  - Set the DFU wrapper's USB product ID (default 0x00FF).\n");
-    printf("-d <num>  - Set the DFU wrapper's USB device ID (default 0x0000).\n");
-    printf("-a <num>  - Set the address the binary will be flashed to.\n");
-    printf("-x        - Overwrite existing output file without prompting.\n");
-    printf("-f        - Force wrapper writing even if a wrapper already exists.\n");
-    printf("-? or -h  - Show this help.\n");
-    printf("-q        - Quiet mode. Disable output to stdio.\n");
-    printf("-e        - Enable verbose output\n\n");
-    printf("Example:\n\n");
-    printf("   dfuwrap -i program.bin -o program.dfu -a 0x1800\n\n");
-    printf("wraps program.bin in a DFU wrapper which will cause the image to\n");
-    printf("address 0x1800 in flash.\n\n");
-}
+//void
+//ShowHelp(void)
+//{
+//    //
+//    // Only print help if we are not in quiet mode.
+//    //
+//    if(g_bQuiet)
+//    {
+//        return;
+//    }
+//
+//    printf("This application may be used to wrap binary files which are\n");
+//    printf("to be flashed to a Tiva device using the USB boot loader.\n");
+//    printf("Additionally, the application can check the validity of an\n");
+//    printf("existing Device Firmware Upgrade (DFU) wrapper or remove the\n");
+//    printf("wrapper to retrieve the original binary payload.\n\n");
+//    printf("Supported parameters are:\n\n");
+//    printf("-i <file> - The name of the input file.\n");
+//    printf("-o <file> - The name of the output file (default image.dfu)\n");
+//    printf("-r        - Remove an existing DFU wrapper from the input file.\n");
+//    printf("-c        - Check validity of the input file's existing DFU wrapper.\n");
+//    printf("-v <num>  - Set the DFU wrapper's USB vendor ID (default 0x1CBE).\n");
+//    printf("-p <num>  - Set the DFU wrapper's USB product ID (default 0x00FF).\n");
+//    printf("-d <num>  - Set the DFU wrapper's USB device ID (default 0x0000).\n");
+//    printf("-a <num>  - Set the address the binary will be flashed to.\n");
+//    printf("-x        - Overwrite existing output file without prompting.\n");
+//    printf("-f        - Force wrapper writing even if a wrapper already exists.\n");
+//    printf("-? or -h  - Show this help.\n");
+//    printf("-q        - Quiet mode. Disable output to stdio.\n");
+//    printf("-e        - Enable verbose output\n\n");
+//    printf("Example:\n\n");
+//    printf("   dfuwrap -i program.bin -o program.dfu -a 0x1800\n\n");
+//    printf("wraps program.bin in a DFU wrapper which will cause the image to\n");
+//    printf("address 0x1800 in flash.\n\n");
+//}
 
 //*****************************************************************************
 //
@@ -292,160 +268,160 @@ ShowHelp(void)
 // Returns 0 on failure, 1 on success.
 //
 //*****************************************************************************
-int
-ParseCommandLine(int argc, char *argv[])
-{
-    int iRetcode;
-    //BOOL bRetcode;
-    BOOL bShowHelp;
-
-    //
-    // By default, don't show the help screen.
-    //
-    bShowHelp = FALSE;
-
-    while(1)
-    {
-        //
-        // Get the next command line parameter.
-        //
-        iRetcode = getopt(argc, argv, "a:i:o:v:d:p:eh?qcrfx");
-
-        if(iRetcode == -1)
-        {
-            break;
-        }
-
-        switch(iRetcode)
-        {
-            case 'i':
-                g_pszInput = optarg;
-                break;
-
-            case 'o':
-                g_pszOutput = optarg;
-                break;
-
-            case 'v':
-                g_usVendorID = (unsigned short)strtol(optarg, NULL, 0);
-                break;
-
-            case 'd':
-                g_usDeviceID = (unsigned short)strtol(optarg, NULL, 0);
-                break;
-
-            case 'p':
-                g_usProductID = (unsigned short)strtol(optarg, NULL, 0);
-                break;
-
-            case 'a':
-                g_ulAddress = (unsigned long)strtol(optarg, NULL, 0);
-                break;
-
-            case 'e':
-                g_bVerbose = TRUE;
-                break;
-
-            case 'f':
-                g_bForce = TRUE;
-                break;
-
-            case 'q':
-                g_bQuiet = TRUE;
-                break;
-
-            case 'x':
-                g_bOverwrite = TRUE;
-                break;
-
-            case 'c':
-                g_bCheck = TRUE;
-                break;
-
-            case 'r':
-                g_bAdd = FALSE;
-                break;
-
-            case '?':
-            case 'h':
-                bShowHelp = TRUE;
-                break;
-        }
-    }
-
-    //
-    // Show the welcome banner unless we have been told to be quiet.
-    //
-    PrintWelcome();
-
-    //
-    // Catch various invalid parameter cases.
-    //
-    if(bShowHelp || (g_pszInput == NULL) ||
-       ((/*(g_ulAddress == 0) ||*/ (g_ulAddress & 1023)) && g_bAdd && !g_bCheck))
-    {
-        ShowHelp();
-
-        //
-        // Make sure we were given an input file.
-        //
-        if(g_pszInput == NULL)
-        {
-            QUIETPRINT("ERROR: An input file must be specified using the -i "
-                       "parameter.\n");
-        }
-
-        //
-        // Make sure we were given a start address.
-        //
-        if(g_bAdd && !g_bCheck)
-        {
-            /*if(g_ulAddress == 0)
-            {
-                QUIETPRINT("ERROR: The flash address of the image must be "
-                           "provided using the -a parameter.\n");
-            }
-            else*/
-            {
-                QUIETPRINT("ERROR: The supplied flash address must be a "
-                           "multiple of 1024.\n");
-            }
-        }
-
-        //
-        // If we get here, we exit immediately.
-        //
-        exit(1);
-    }
-
-    //
-    // Tell the caller that everything is OK.
-    //
-    return(1);
-}
+//int
+//ParseCommandLine(int argc, char *argv[])
+//{
+//    int iRetcode;
+//    //BOOL bRetcode;
+//    BOOL bShowHelp;
+//
+//    //
+//    // By default, don't show the help screen.
+//    //
+//    bShowHelp = FALSE;
+//
+//    while(1)
+//    {
+//        //
+//        // Get the next command line parameter.
+//        //
+//        iRetcode = getopt(argc, argv, "a:i:o:v:d:p:eh?qcrfx");
+//
+//        if(iRetcode == -1)
+//        {
+//            break;
+//        }
+//
+//        switch(iRetcode)
+//        {
+//            case 'i':
+//                g_pszInput = optarg;
+//                break;
+//
+//            case 'o':
+//                g_pszOutput = optarg;
+//                break;
+//
+//            case 'v':
+//                g_usVendorID = (unsigned short)strtol(optarg, NULL, 0);
+//                break;
+//
+//            case 'd':
+//                g_usDeviceID = (unsigned short)strtol(optarg, NULL, 0);
+//                break;
+//
+//            case 'p':
+//                g_usProductID = (unsigned short)strtol(optarg, NULL, 0);
+//                break;
+//
+//            case 'a':
+//                g_ulAddress = (unsigned long)strtol(optarg, NULL, 0);
+//                break;
+//
+//            case 'e':
+//                g_bVerbose = TRUE;
+//                break;
+//
+//            case 'f':
+//                g_bForce = TRUE;
+//                break;
+//
+//            case 'q':
+//                g_bQuiet = TRUE;
+//                break;
+//
+//            case 'x':
+//                g_bOverwrite = TRUE;
+//                break;
+//
+//            case 'c':
+//                g_bCheck = TRUE;
+//                break;
+//
+//            case 'r':
+//                g_bAdd = FALSE;
+//                break;
+//
+//            case '?':
+//            case 'h':
+//                bShowHelp = TRUE;
+//                break;
+//        }
+//    }
+//
+//    //
+//    // Show the welcome banner unless we have been told to be quiet.
+//    //
+//    PrintWelcome();
+//
+//    //
+//    // Catch various invalid parameter cases.
+//    //
+//    if(bShowHelp || (g_pszInput == NULL) ||
+//       ((/*(g_ulAddress == 0) ||*/ (g_ulAddress & 1023)) && g_bAdd && !g_bCheck))
+//    {
+//        ShowHelp();
+//
+//        //
+//        // Make sure we were given an input file.
+//        //
+//        if(g_pszInput == NULL)
+//        {
+//            QUIETPRINT("ERROR: An input file must be specified using the -i "
+//                       "parameter.\n");
+//        }
+//
+//        //
+//        // Make sure we were given a start address.
+//        //
+//        if(g_bAdd && !g_bCheck)
+//        {
+//            /*if(g_ulAddress == 0)
+//            {
+//                QUIETPRINT("ERROR: The flash address of the image must be "
+//                           "provided using the -a parameter.\n");
+//            }
+//            else*/
+//            {
+//                QUIETPRINT("ERROR: The supplied flash address must be a "
+//                           "multiple of 1024.\n");
+//            }
+//        }
+//
+//        //
+//        // If we get here, we exit immediately.
+//        //
+//        exit(1);
+//    }
+//
+//    //
+//    // Tell the caller that everything is OK.
+//    //
+//    return(1);
+//}
 
 //*****************************************************************************
 //
 // Dump the command line parameters to stdout if we are in verbose mode.
 //
 //*****************************************************************************
-void
-DumpCommandLineParameters(void)
-{
-    if(!g_bQuiet && g_bVerbose)
-    {
-        printf("Input file:        \"%s\"\n", g_pszInput);
-        printf("Output file:       \"%s\"\n", g_pszOutput);
-        printf("Operation:         %s\n",
-               g_bCheck ? "Check" : (g_bAdd ? "Add" : "Remove"));
-        printf("Vendor ID:         0x%04x\n", g_usVendorID);
-        printf("Product ID:        0x%04x\n", g_usProductID);
-        printf("Device ID:         0x%04x\n", g_usDeviceID);
-        printf("Flash Address:     0x%08lx\n", g_ulAddress);
-        printf("Overwrite output?: %s\n", g_bOverwrite ? "Yes" : "No");
-        printf("Force wrapper?:    %s\n", g_bForce ? "Yes" : "No");
-    }
-}
+//void
+//DumpCommandLineParameters(void)
+//{
+//    if(!g_bQuiet && g_bVerbose)
+//    {
+//        printf("Input file:        \"%s\"\n", g_pszInput);
+//        printf("Output file:       \"%s\"\n", g_pszOutput);
+//        printf("Operation:         %s\n",
+//               g_bCheck ? "Check" : (g_bAdd ? "Add" : "Remove"));
+//        printf("Vendor ID:         0x%04x\n", g_usVendorID);
+//        printf("Product ID:        0x%04x\n", g_usProductID);
+//        printf("Device ID:         0x%04x\n", g_usDeviceID);
+//        printf("Flash Address:     0x%08lx\n", g_ulAddress);
+//        printf("Overwrite output?: %s\n", g_bOverwrite ? "Yes" : "No");
+//        printf("Force wrapper?:    %s\n", g_bForce ? "Yes" : "No");
+//    }
+//}
 
 //*****************************************************************************
 //
@@ -462,22 +438,22 @@ DumpCommandLineParameters(void)
 //
 //*****************************************************************************
 unsigned char *
-ReadInputFile(char *pcFilename, BOOL bHdrs, unsigned long *pulLength)
+Bin2DfuWrapper::ReadInputFile(const std::string& pcFilename, bool bHdrs, unsigned long *pulLength)
 {
-    char *pcFileBuffer;
+    unsigned char *pcFileBuffer;
     int iRead;
     int iSize;
     int iSizeAlloc;
     FILE *fhFile;
 	errno_t err;
 
-    QUIETPRINT("Reading input file \"%s\"\n", pcFilename);
+    QUIETPRINT("Reading input file \"%s\"\n", pcFilename.c_str());
 
     //
     // Try to open the input file.
     //
     // fhFile = fopen(pcFilename, "rb");
-	if((err = fopen_s(&fhFile, pcFilename, "rb")) != 0)
+	if((err = fopen_s(&fhFile, pcFilename.c_str(), "rb")) != 0)
     {
         //
         // File not found or cannot be opened for some reason.
@@ -499,7 +475,7 @@ ReadInputFile(char *pcFilename, BOOL bHdrs, unsigned long *pulLength)
     //
     iSizeAlloc = iSize + (bHdrs ?
                     (sizeof(g_pcDFUPrefix) + sizeof(g_pcDFUSuffix)) : 0);
-    pcFileBuffer = malloc(iSizeAlloc);
+    pcFileBuffer = (unsigned char *)malloc(iSizeAlloc);
     if(pcFileBuffer == NULL)
     {
         QUIETPRINT("Can't allocate %d bytes of memory!\n", iSizeAlloc);
@@ -563,8 +539,8 @@ ReadInputFile(char *pcFilename, BOOL bHdrs, unsigned long *pulLength)
 // Tiva-specific DFU download prefix structure.
 //
 //*****************************************************************************
-BOOL
-IsPrefixValid(unsigned char *pcPrefix, unsigned char *pcEnd)
+bool
+Bin2DfuWrapper::IsPrefixValid(unsigned char *pcPrefix, unsigned char *pcEnd)
 {
     unsigned short usStartAddr;
     unsigned long ulLength;
@@ -580,7 +556,7 @@ IsPrefixValid(unsigned char *pcPrefix, unsigned char *pcEnd)
         // Nope - prefix can't be valid.
         //
         VERBOSEPRINT("File is too short to contain a prefix.\n");
-        return(FALSE);
+        return(false);
     }
 
     //
@@ -592,7 +568,7 @@ IsPrefixValid(unsigned char *pcPrefix, unsigned char *pcEnd)
         // First two values are not as expected so the prefix is invalid.
         //
         VERBOSEPRINT("Prefix fixed values are incorrect.\n");
-        return(FALSE);
+        return(false);
     }
 
     //
@@ -614,14 +590,14 @@ IsPrefixValid(unsigned char *pcPrefix, unsigned char *pcEnd)
         // Nope. Prefix is invalid.
         //
         VERBOSEPRINT("Length is not valid for supplied data. %i\n", ulLength);
-        return(FALSE);
+        return(false);
     }
 
     //
     // If we get here, the prefix is valid.
     //
     VERBOSEPRINT("Prefix appears valid.\n");
-    return(TRUE);
+    return(true);
 }
 
 //*****************************************************************************
@@ -630,8 +606,8 @@ IsPrefixValid(unsigned char *pcPrefix, unsigned char *pcEnd)
 // DFU-standard suffix structure.
 //
 //*****************************************************************************
-BOOL
-IsSuffixValid(unsigned char *pcData, unsigned char *pcEnd)
+bool
+Bin2DfuWrapper::IsSuffixValid(unsigned char *pcData, unsigned char *pcEnd)
 {
     unsigned char ucSuffixLen;
     unsigned long ulCRCRead, ulCRCCalc;
@@ -655,7 +631,7 @@ IsSuffixValid(unsigned char *pcData, unsigned char *pcEnd)
         // The reported length cannot indicate a valid suffix.
         //
         VERBOSEPRINT("Suffix length is not valid.\n");
-        return(FALSE);
+        return(false);
     }
 
     //
@@ -669,7 +645,7 @@ IsSuffixValid(unsigned char *pcData, unsigned char *pcEnd)
         // The DFU marker is not in place so the suffix is invalid.
         //
         VERBOSEPRINT("Suffix 'DFU' marker is not present.\n");
-        return(FALSE);
+        return(false);
     }
 
     //
@@ -685,13 +661,13 @@ IsSuffixValid(unsigned char *pcData, unsigned char *pcEnd)
     if(ulCRCRead == ulCRCCalc)
     {
         VERBOSEPRINT("DFU suffix is valid.\n");
-        return(TRUE);
+        return(true);
     }
     else
     {
         VERBOSEPRINT("Read CRC 0x%08lx, calculated 0x%08lx.\n", ulCRCRead, ulCRCCalc);
         VERBOSEPRINT("DFU suffix is invalid.\n");
-        return(FALSE);
+        return(false);
     }
 }
 
@@ -701,7 +677,7 @@ IsSuffixValid(unsigned char *pcData, unsigned char *pcEnd)
 //
 //*****************************************************************************
 void
-DumpPrefix(unsigned char *pcPrefix)
+Bin2DfuWrapper::DumpPrefix(unsigned char *pcPrefix)
 {
     unsigned long ulLength;
 
@@ -722,7 +698,7 @@ DumpPrefix(unsigned char *pcPrefix)
 //
 //*****************************************************************************
 void
-DumpSuffix(unsigned char *pcEnd)
+Bin2DfuWrapper::DumpSuffix(unsigned char *pcEnd)
 {
     QUIETPRINT("\nDFU File Suffix\n");
     QUIETPRINT("---------------\n\n");
@@ -744,7 +720,7 @@ DumpSuffix(unsigned char *pcEnd)
 //
 //*****************************************************************************
 int
-WriteOutputFile(char *pszFile, unsigned char *pcData, unsigned long ulLength)
+Bin2DfuWrapper::WriteOutputFile(const std::string& pszFile, unsigned char *pcData, unsigned long ulLength)
 {
     FILE *fh;
     int iResponse;
@@ -760,7 +736,7 @@ WriteOutputFile(char *pszFile, unsigned char *pcData, unsigned long ulLength)
         //
         // No - we need to check to see if the file exists before proceeding.
         //
-        if((err = fopen_s(&fh, pszFile, "rb")) == EEXIST)
+        if((err = fopen_s(&fh, pszFile.c_str(), "rb")) == EEXIST)
         {
             VERBOSEPRINT("Output file already exists.\n");
 
@@ -772,7 +748,7 @@ WriteOutputFile(char *pszFile, unsigned char *pcData, unsigned long ulLength)
 
             if(!g_bQuiet)
             {
-                printf("File \"%s\" exists. Overwrite? ", pszFile);
+                printf("File \"%s\" exists. Overwrite? ", pszFile.c_str());
                 iResponse = getc(stdin);
                 if((iResponse != 'y') && (iResponse != 'Y'))
                 {
@@ -800,7 +776,7 @@ WriteOutputFile(char *pszFile, unsigned char *pcData, unsigned long ulLength)
     // If we reach here, it is fine to overwrite the file (or the file doesn't
     // already exist) so go ahead and open it.
     //
-	if((err = fopen_s(&fh, pszFile, "wb")) != 0)
+	if((err = fopen_s(&fh, pszFile.c_str(), "wb")) != 0)
     {
         QUIETPRINT("Error opening output file for writing\n");
         return(8);
@@ -829,7 +805,7 @@ WriteOutputFile(char *pszFile, unsigned char *pcData, unsigned long ulLength)
     }
     else
     {
-        QUIETPRINT("Output file written successfully ===> \"%s\"\n", pszFile);
+        QUIETPRINT("Output file written successfully ===> \"%s\"\n", pszFile.c_str());
     }
 
     return(0);
@@ -841,16 +817,16 @@ WriteOutputFile(char *pszFile, unsigned char *pcData, unsigned long ulLength)
 //
 //*****************************************************************************
 int
-main(int argc, char *argv[])
+Bin2DfuWrapper::applyWrapper(const std::string& inSourceFilePath, const std::string& inDestFilePath)
 {
-    int iRetcode;
-    unsigned char *pcInput;
-    unsigned char *pcPrefix;
-    unsigned char *pcSuffix;
-    unsigned long ulFileLen;
-    unsigned long ulCRC;
-    BOOL bSuffixValid;
-    BOOL bPrefixValid;
+    int iRetcode = 1;
+    unsigned char *pcInput = 0;
+    unsigned char *pcPrefix = 0;
+    unsigned char *pcSuffix = 0;
+    unsigned long ulFileLen = 0;
+    unsigned long ulCRC = 0;
+    bool bSuffixValid = false;
+    bool bPrefixValid = false;
 
     //
     // Initialize the CRC32 lookup table.
@@ -858,27 +834,13 @@ main(int argc, char *argv[])
     InitCRC32Table();
 
     //
-    // Parse the command line arguments
-    //
-    iRetcode = ParseCommandLine(argc, argv);
-    if(!iRetcode)
-    {
-        return(1);
-    }
-
-    //
-    // Echo the command line settings to stdout in verbose mode.
-    //
-    DumpCommandLineParameters();
-
-    //
     // Read the input file into memory.
     //
-    pcInput = ReadInputFile(g_pszInput, g_bAdd, &ulFileLen);
+    pcInput = ReadInputFile(inSourceFilePath.c_str(), g_bAdd, &ulFileLen);
     if(!pcInput)
     {
         VERBOSEPRINT("Error reading input file.\n");
-        exit(1);
+        return(1);
     }
 
     //
@@ -951,7 +913,7 @@ main(int argc, char *argv[])
                 // Write the input file payload to the output file, this removing
                 // the wrapper.
                 //
-                iRetcode = WriteOutputFile(g_pszOutput,
+                iRetcode = WriteOutputFile(inDestFilePath,
                                            pcPrefix + sizeof(g_pcDFUPrefix),
                                            READ_LONG(pcPrefix + 4));
             }
@@ -1001,7 +963,7 @@ main(int argc, char *argv[])
                 //
                 // Now write the wrapped file to the output.
                 //
-                iRetcode = WriteOutputFile(g_pszOutput, pcInput, ulFileLen);
+                iRetcode = WriteOutputFile(inDestFilePath, pcInput, ulFileLen);
             }
         }
     }
@@ -1014,5 +976,5 @@ main(int argc, char *argv[])
     //
     // Exit the program and tell the OS that all is well.
     //
-    exit(iRetcode);
+    return(iRetcode);
 }

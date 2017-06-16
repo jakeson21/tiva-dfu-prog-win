@@ -194,10 +194,12 @@ if $(ConfigurationName) == Release copy $(TargetPath) $(SolutionDir)windfu_bin
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bin2dfuwrap.cpp" />
     <ClCompile Include="dfuprog.cpp" />
     <ClCompile Include="lmdfuwrap.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bin2dfuwrap.h" />
     <ClInclude Include="lmdfuwrap.h" />
   </ItemGroup>
   <ItemGroup>

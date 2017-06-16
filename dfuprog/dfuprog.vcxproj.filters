@@ -21,9 +21,15 @@
     <ClCompile Include="lmdfuwrap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="bin2dfuwrap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lmdfuwrap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="bin2dfuwrap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
