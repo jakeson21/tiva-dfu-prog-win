@@ -36,6 +36,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 
 #include "lmdfu.h"
 #include "lmdfuwrap.h"
@@ -70,10 +71,12 @@ std::string g_pszFile;
 unsigned long g_ulAddress  = 0;
 unsigned long g_ulAddressOverride  = 0xFFFFFFFF;
 unsigned long g_ulLength = 0;
-int g_iComPortNumber = -1;
+std::string g_sComPortNumber = "COM0";
 int g_iDeviceIndex = 0;
 
 HWND GetConsoleHwnd(void);
+
+static const int BOOTLOAD_PORT_RATE = 1200;
 
 //*****************************************************************************
 //
@@ -140,7 +143,7 @@ ShowHelp(void)
     printf("existing application image or a subsection of flash and store it\n");
     printf("either as raw data or wrapped as a DFU-downloadable image.\n\n");
     printf("Supported parameters are:\n\n");
-    printf("-p <num>  - COM port number assigned to device.\n");
+    printf("-p <num>  - COM port assigned to device. USe [COMn | n]\n");
     printf("-e        - Enumerate connected devices, show info then exit.\n");
     printf("-m        - Switch into DFU mode if device is currently in runtime mode.\n");
     printf("-u        - Upload an image from the board into the target DFU file.\n");
@@ -301,7 +304,10 @@ ParseCommandLine(int argc, char *argv[])
                 break;
 
             case 'p':
-                g_iComPortNumber = (int)strtol(pcOptArg, NULL, 0);
+                g_sComPortNumber = pcOptArg;
+                // If only a number was specified, append "COM". Assumes port numbers are less than 1000. Enforce uppercase name.
+                if (g_sComPortNumber.size() < 4) { g_sComPortNumber = "COM" + g_sComPortNumber; }
+                else { std::transform(g_sComPortNumber.begin(), g_sComPortNumber.end(), g_sComPortNumber.begin(), ::toupper); }
                 iParm++;
                 break;
 
@@ -435,7 +441,7 @@ InitiateDFUMode(size_t inBaudRate, const std::string& inPort)
         return false;
     }    
     CloseHandle(hComm);
-    std::cout << "Sucessfully connected to " << inPort.c_str() << " at " << inBaudRate << " baud" << std::endl;
+    std::cout << "Sucessfully connected on " << inPort.c_str() << " at " << inBaudRate << " baud" << std::endl;
     std::cout << "Device entering DFU mode" << std::endl;
 
     return true;
@@ -977,12 +983,12 @@ main(int argc,char* argv[])
     ParseCommandLine(argc, argv);
 
 	// Toggle COM port to put device in DFU mode
-    if (g_iComPortNumber > 0)
+    if (g_sComPortNumber > "COM0")
     {
-        std::cout << "Attempting to connect on COM" << g_iComPortNumber << std::endl;
+        std::cout << "Attempting to connect on " << g_sComPortNumber << " at " << BOOTLOAD_PORT_RATE << " baud" << std::endl;
         std::stringstream port;
-        port << "COM" << g_iComPortNumber;
-        if (!InitiateDFUMode(1200, port.str())) return true;
+        port << g_sComPortNumber;
+        if (!InitiateDFUMode(BOOTLOAD_PORT_RATE, port.str())) return true;
     }
     else
     {
@@ -1057,8 +1063,8 @@ main(int argc,char* argv[])
         //
         // Try to open a device.
         //
-        char chevrons[] = {'-', '\\', '|', '/'};
-        std::vector<char> spin(chevrons, chevrons + (sizeof(chevrons) / sizeof(char)));
+        //char chevrons[] = {'-', '\\', '|', '/'};
+        //std::vector<char> spin(chevrons, chevrons + (sizeof(chevrons) / sizeof(char)));
         
         auto timeout_ms = 5000;
         auto elapsed_ms = 0;
@@ -1067,11 +1073,13 @@ main(int argc,char* argv[])
         {
             Sleep(100);
             elapsed_ms += 100;
-            std::cout << "\b" << spin[n] << "\b";
+            //std::cout << "\b" << spin[n] << "\b";
+            std::cout << ".";
             if (elapsed_ms >= timeout_ms) { break; }
-            if (++n >= spin.size()) { n = 0;  }
+            //if (++n >= spin.size()) { n = 0;  }
         }
-        std::cout << " \b" << std::endl;        
+        //std::cout << " \b" << std::endl;
+        std::cout << std::endl;
 
         //
         // Were we successful?
