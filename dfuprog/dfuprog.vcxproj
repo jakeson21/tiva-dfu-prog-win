@@ -161,8 +161,9 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>if not exist "$(SolutionDir)windfu_bin" mkdir $(SolutionDir)windfu_bin
-if $(ConfigurationName) == Release copy $(TargetPath) $(SolutionDir)windfu_bin
+      <Command>if not exist "$(SolutionDir)bin" mkdir $(SolutionDir)bin
+if $(ConfigurationName) == Release copy $(TargetPath) $(SolutionDir)bin
+if exist $(SolutionDir)bin\$(TargetFileName) move /Y $(SolutionDir)bin\$(TargetFileName) $(SolutionDir)bin\tiva-dfu-prog$(TargetExt)
 </Command>
       <Message>Copying $(TargetFileName) to $(SolutionDir)bin</Message>
     </PostBuildEvent>

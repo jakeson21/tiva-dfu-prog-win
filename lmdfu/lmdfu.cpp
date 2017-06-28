@@ -1093,8 +1093,10 @@ DFUDownloadTransfer(tLMDFUDeviceState *pState, bool bCheckStatus,
     //
     bRetcode = Endpoint0Transfer(pState->hUSB, (REQUEST_TRANSFER_OUT |
                           REQUEST_TYPE_CLASS | REQUEST_RECIPIENT_INTERFACE),
-                          USBD_DFU_REQUEST_DNLOAD, pState->usBlockNum++,
-                          pState->usInterface, iLength, (PUCHAR)pcData,
+                          USBD_DFU_REQUEST_DNLOAD, 
+                          pState->usBlockNum++,
+                          pState->usInterface, 
+                          iLength, (PUCHAR)pcData,
                           &usCount);
 
     //
