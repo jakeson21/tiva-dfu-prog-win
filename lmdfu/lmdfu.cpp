@@ -12,6 +12,9 @@
 #include "dfu_guids.h"
 #include "lmusbdll.h"
 
+#include <chrono>
+#include <thread>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -1175,7 +1178,7 @@ DFUDownloadTransfer(tLMDFUDeviceState *pState, bool bCheckStatus,
                     // Twiddle our thumbs until this number of milliseconds has
                     // elapsed.
                     //
-                    Sleep(dwTimeout);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(dwTimeout));
                 }
             }
         }
@@ -1798,7 +1801,7 @@ DFUMakeDeviceIdle(tLMDFUDeviceState *pState)
                             (sStatus.bwPollTimeout[1] << 8) +
                             (sStatus.bwPollTimeout[2] << 8);
 
-                Sleep(dwTimeout);
+                std::this_thread::sleep_for(std::chrono::milliseconds(dwTimeout));
             }
             //
             // Drop through.
@@ -2905,6 +2908,7 @@ LMDFUDownload(tLMDFUHandle hHandle, unsigned char *pcDFUImage,
     //
     ulImageLen -= pcDFUImage[ulImageLen - 5];
 
+    TRACE("LMDFUDownload image size %d\n", ulImageLen);
     //
     // Download the contents of the file minus the DFU suffix which we don't
     // send to the device.

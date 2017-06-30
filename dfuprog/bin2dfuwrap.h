@@ -11,7 +11,7 @@ public:
     //const unsigned char FALSE = 0;
     //const unsigned char TRUE = 1;
 
-    Bin2DfuWrapper(unsigned long inAddress = 0x0000, bool inVerboseOn = false)
+    Bin2DfuWrapper(uint32_t inAddress = 0x0000, bool inVerboseOn = false)
     {
         g_bVerbose = inVerboseOn;
         g_bQuiet = false;
@@ -32,15 +32,15 @@ public:
     int applyWrapper(const std::string& inSourceFilePath, const std::string& inDestFilePath);
 
 private:
-    unsigned long Reflect(unsigned long ulRef, char ucCh);
+    uint32_t Reflect(uint32_t ulRef, char ucCh);
     void InitCRC32Table();
-    unsigned long CalculateCRC32(unsigned char *pcData, unsigned long ulLength);
-    unsigned char * ReadInputFile(const std::string& pcFilename, bool bHdrs, unsigned long *pulLength);
+    uint32_t CalculateCRC32(unsigned char *pcData, uint32_t ulLength);
+    unsigned char * ReadInputFile(const std::string& pcFilename, bool bHdrs, uint32_t *pulLength);
     bool IsPrefixValid(unsigned char *pcPrefix, unsigned char *pcEnd);
     bool IsSuffixValid(unsigned char *pcData, unsigned char *pcEnd);
     void DumpPrefix(unsigned char *pcPrefix);
     void DumpSuffix(unsigned char *pcEnd);
-    int WriteOutputFile(const std::string& pszFile, unsigned char *pcData, unsigned long ulLength);
+    int WriteOutputFile(const std::string& pszFile, unsigned char *pcData, uint32_t ulLength);
 
 
     //*****************************************************************************
@@ -54,10 +54,10 @@ private:
     bool g_bAdd;
     bool g_bCheck;
     bool g_bForce;
-    unsigned long  g_ulAddress;
-    unsigned short g_usVendorID;
-    unsigned short g_usProductID;
-    unsigned short g_usDeviceID;
+    uint32_t  g_ulAddress;
+    uint16_t g_usVendorID;
+    uint16_t g_usProductID;
+    uint16_t g_usDeviceID;
     std::string g_pszOutput;
 
 };

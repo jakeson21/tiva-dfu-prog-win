@@ -109,6 +109,13 @@
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
+    <PostBuildEvent>
+      <Command>if not exist "$(SolutionDir)bin-debug" mkdir $(SolutionDir)bin-debug
+if $(ConfigurationName) == Debug copy $(TargetPath) $(SolutionDir)bin-debug
+if exist $(SolutionDir)bin-debug\$(TargetFileName) move /Y $(SolutionDir)bin-debug\$(TargetFileName) $(SolutionDir)bin-debug\tiva-dfu-prog$(TargetExt)
+</Command>
+      <Message>Copying $(TargetFileName) to $(SolutionDir)bin-debug</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>

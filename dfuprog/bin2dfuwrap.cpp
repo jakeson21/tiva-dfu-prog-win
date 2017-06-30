@@ -72,7 +72,7 @@
 // Storage for the CRC32 calculation lookup table.
 //
 //*****************************************************************************
-unsigned long g_pulCRC32Table[256];
+uint32_t g_pulCRC32Table[256];
 
 //*****************************************************************************
 //
@@ -125,10 +125,10 @@ unsigned char g_pcDFUPrefix[] =
 // http://www.createwindow.com/programming/crc32/index.htm.
 //
 //*****************************************************************************
-unsigned long
-Bin2DfuWrapper::Reflect(unsigned long ulRef, char ucCh)
+uint32_t
+Bin2DfuWrapper::Reflect(uint32_t ulRef, char ucCh)
 {
-      unsigned long ulValue;
+      uint32_t ulValue;
       int iLoop;
 
       ulValue = 0;
@@ -148,7 +148,7 @@ Bin2DfuWrapper::Reflect(unsigned long ulRef, char ucCh)
 void
 Bin2DfuWrapper::InitCRC32Table()
 {
-    unsigned long ulPolynomial;
+    uint32_t ulPolynomial;
     int i, j;
 
     // This is the ANSI X 3.66 polynomial as required by the DFU
@@ -174,11 +174,11 @@ Bin2DfuWrapper::InitCRC32Table()
 // Calculate the CRC for the supplied block of data.
 //
 //*****************************************************************************
-unsigned long
-Bin2DfuWrapper::CalculateCRC32(unsigned char *pcData, unsigned long ulLength)
+uint32_t
+Bin2DfuWrapper::CalculateCRC32(unsigned char *pcData, uint32_t ulLength)
 {
-    unsigned long ulCRC;
-    unsigned long ulCount;
+    uint32_t ulCRC;
+    uint32_t ulCount;
     unsigned char* pcBuffer;
     unsigned char ucChar;
 
@@ -303,19 +303,19 @@ Bin2DfuWrapper::CalculateCRC32(unsigned char *pcData, unsigned long ulLength)
 //                break;
 //
 //            case 'v':
-//                g_usVendorID = (unsigned short)strtol(optarg, NULL, 0);
+//                g_usVendorID = (uint16_t)strtol(optarg, NULL, 0);
 //                break;
 //
 //            case 'd':
-//                g_usDeviceID = (unsigned short)strtol(optarg, NULL, 0);
+//                g_usDeviceID = (uint16_t)strtol(optarg, NULL, 0);
 //                break;
 //
 //            case 'p':
-//                g_usProductID = (unsigned short)strtol(optarg, NULL, 0);
+//                g_usProductID = (uint16_t)strtol(optarg, NULL, 0);
 //                break;
 //
 //            case 'a':
-//                g_ulAddress = (unsigned long)strtol(optarg, NULL, 0);
+//                g_ulAddress = (uint32_t)strtol(optarg, NULL, 0);
 //                break;
 //
 //            case 'e':
@@ -438,7 +438,7 @@ Bin2DfuWrapper::CalculateCRC32(unsigned char *pcData, unsigned long ulLength)
 //
 //*****************************************************************************
 unsigned char *
-Bin2DfuWrapper::ReadInputFile(const std::string& pcFilename, bool bHdrs, unsigned long *pulLength)
+Bin2DfuWrapper::ReadInputFile(const std::string& pcFilename, bool bHdrs, uint32_t *pulLength)
 {
     unsigned char *pcFileBuffer;
     int iRead;
@@ -528,7 +528,7 @@ Bin2DfuWrapper::ReadInputFile(const std::string& pcFilename, bool bHdrs, unsigne
     //
     // Return the new buffer to the caller along with its size.
     //
-    *pulLength = (unsigned long)iSizeAlloc;
+    *pulLength = (uint32_t)iSizeAlloc;
     return(pcFileBuffer);
 }
 
@@ -542,8 +542,8 @@ Bin2DfuWrapper::ReadInputFile(const std::string& pcFilename, bool bHdrs, unsigne
 bool
 Bin2DfuWrapper::IsPrefixValid(unsigned char *pcPrefix, unsigned char *pcEnd)
 {
-    unsigned short usStartAddr;
-    unsigned long ulLength;
+    uint16_t usStartAddr;
+    uint32_t ulLength;
 
     VERBOSEPRINT("Looking for valid prefix...\n");
 
@@ -610,7 +610,7 @@ bool
 Bin2DfuWrapper::IsSuffixValid(unsigned char *pcData, unsigned char *pcEnd)
 {
     unsigned char ucSuffixLen;
-    unsigned long ulCRCRead, ulCRCCalc;
+    uint32_t ulCRCRead, ulCRCCalc;
 
     VERBOSEPRINT("Looking for valid suffix...\n");
 
@@ -679,7 +679,7 @@ Bin2DfuWrapper::IsSuffixValid(unsigned char *pcData, unsigned char *pcEnd)
 void
 Bin2DfuWrapper::DumpPrefix(unsigned char *pcPrefix)
 {
-    unsigned long ulLength;
+    uint32_t ulLength;
 
     ulLength = READ_LONG(pcPrefix + 4);
 
@@ -720,11 +720,11 @@ Bin2DfuWrapper::DumpSuffix(unsigned char *pcEnd)
 //
 //*****************************************************************************
 int
-Bin2DfuWrapper::WriteOutputFile(const std::string& pszFile, unsigned char *pcData, unsigned long ulLength)
+Bin2DfuWrapper::WriteOutputFile(const std::string& pszFile, unsigned char *pcData, uint32_t ulLength)
 {
     FILE *fh;
     int iResponse;
-    unsigned long ulWritten;
+    uint32_t ulWritten;
 	errno_t err;
 
     //
@@ -823,8 +823,8 @@ Bin2DfuWrapper::applyWrapper(const std::string& inSourceFilePath, const std::str
     unsigned char *pcInput = 0;
     unsigned char *pcPrefix = 0;
     unsigned char *pcSuffix = 0;
-    unsigned long ulFileLen = 0;
-    unsigned long ulCRC = 0;
+    uint32_t ulFileLen = 0;
+    uint32_t ulCRC = 0;
     bool bSuffixValid = false;
     bool bPrefixValid = false;
 

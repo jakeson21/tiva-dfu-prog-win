@@ -37,6 +37,8 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+#include <chrono>
+#include <thread>
 
 #include "lmdfu.h"
 #include "lmdfuwrap.h"
@@ -945,7 +947,7 @@ HWND GetConsoleHwnd(void)
 
 	// Ensure window title has been updated.
 
-	Sleep(40);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	// Look for NewWindowTitle.
 
@@ -1066,16 +1068,14 @@ main(int argc,char* argv[])
         //char chevrons[] = {'-', '\\', '|', '/'};
         //std::vector<char> spin(chevrons, chevrons + (sizeof(chevrons) / sizeof(char)));
         
-        auto timeout_ms = 5000;
-        auto elapsed_ms = 0;
-        uint16_t n = 0;
+        auto timeout_ms = 5000;      
         while ((eRetcode = _LMDFUDeviceOpen(iDevIndex, &sDevInfo, &hHandle)) != DFU_OK)
         {
-            Sleep(100);
-            elapsed_ms += 100;
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            timeout_ms -= 100;
             //std::cout << "\b" << spin[n] << "\b";
             std::cout << ".";
-            if (elapsed_ms >= timeout_ms) { break; }
+            if (timeout_ms < 0) { break; }
             //if (++n >= spin.size()) { n = 0;  }
         }
         //std::cout << " \b" << std::endl;
